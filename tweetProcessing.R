@@ -1,4 +1,5 @@
 library(qdap)
+library(dplyr)
 load("three_min_streamSample.Rdata")
 
 # cleaning function
@@ -33,9 +34,23 @@ clean_tweets <- function(tweets){
   tweets$text <- rm_white(tweets$text)
   
   
-  # 
+  # grabbing the platform used for each tweet
+  platform <- rm_between(tweets$source, ">", "</a>", extract = TRUE)
+  tweets$platform_used <- lapply(strsplit(unlist(platform), split = " "), tail, 1)
   
-  tweets
+  # +0000 indicates GMT, remove that first
+  tweets$created_at <- gsub("\\+0000", "", tweets$created_at)
+  tweets$created_at <- parse_date_time(tweets$created_at, orders = "md hms y")
+  
+  final_tweet_df <- tweets %>%
+                        select(text, retweet_count, in_reply_to_screen_name, created_at,
+                               listed_count, location, description, geo_enabled, user_created_at,
+                               statuses_count, followers_count, favourites_count, time_zone, 
+                               utc_offset, friends_count, screen_name, full_name, 
+                               place_lat, place_lon, hashtags_in_tweet, url_in_tweet,
+                               retweet_from, platform_used)
+  
+  final_tweet_df
 }
 
 
