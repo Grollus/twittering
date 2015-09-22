@@ -1,17 +1,22 @@
 library(qdap)
 library(dplyr)
+library(lubridate)
 load("three_min_streamSample.Rdata")
+
 
 # cleaning function
 clean_tweets <- function(tweets){
   # cleans the raw parsedTweet dataframe and reduces it to useful information
   #
   #arg:
-  #   tweets - data frame from parseTweets function (filtered to english only)
+  #   tweets - data frame from parseTweets function 
   #
   #returns:
   #   a data frame with clean text and TODO!!!!!
   
+  # filter to english only tweets and remove duplicates
+  tweets <- tweets %>%
+    filter(lang == "en", !duplicated(text))
   # removal of useful information from tweet text before cleaning
   tweets$hashtags_in_tweet <- rm_hash(tweets$text, extract = TRUE)
   #combine twitter url and base url removal to one step
@@ -32,7 +37,6 @@ clean_tweets <- function(tweets){
   tweets$text <- gsub("&amp", "and", tweets$text)
   tweets$text <- rm_non_words(tweets$text)
   tweets$text <- rm_white(tweets$text)
-  
   
   # grabbing the platform used for each tweet
   platform <- rm_between(tweets$source, ">", "</a>", extract = TRUE)
@@ -56,9 +60,3 @@ clean_tweets <- function(tweets){
 
 
 
-library(tm)
-myCorpus <- Corpus(VectorSource(english_tweets$text))
-
-myCorpus <- tm_map(myCorpus, content_transformer(tolower))
-
-tmp <- rm_(pattern = S("@after_", "\\@", 1), extract = TRUE)
