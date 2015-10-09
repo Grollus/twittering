@@ -2,7 +2,8 @@ library(streamR)
 library(dplyr)
 load("my_oauth.Rdata")
 
-collect_tweets <- function(filename, track = NULL, time = 60, tweets = NULL){
+collect_tweets <- function(filename, track = NULL, time = 60, tweets = NULL,
+                           language = "en"){
   # Basic function to utilize streamR to gather tweets according to parameters
   # Defaults to streaming tweets using twitter's streaming api for 60 seconds
   # 
@@ -21,10 +22,11 @@ collect_tweets <- function(filename, track = NULL, time = 60, tweets = NULL){
     
   }else{
     filterStream(paste0(filename, ".json"), track = track, timeout = time,
-                 tweets = tweets, oauth = my_oauth)
+                 tweets = tweets, language = language, oauth = my_oauth)
     tweet_df <- parseTweets(paste0(filename, ".json"))
   }
 
   save(tweet_df, file = paste0(filename, ".Rdata"))
   return(tweet_df)
 }
+
